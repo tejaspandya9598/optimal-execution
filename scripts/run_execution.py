@@ -4,11 +4,17 @@ Compute the optimal liquidation schedule and the efficient frontier.
     python scripts/run_execution.py                    # real Deribit calibration
     python scripts/run_execution.py --participation 0.05
     python scripts/run_execution.py --offline          # illustrative params, no network
+    python scripts/run_execution.py --calibration data/calibration/BTC-PERPETUAL_2026-10-02.json
+
+Every live run saves what it measured to data/calibration/<instrument>_<date>.json, and
+--calibration replays one, so a published table can be reproduced without the network.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +31,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Almgren-Chriss optimal execution.")
     parser.add_argument("--offline", action="store_true",
                         help="skip the network and use illustrative parameters")
+    parser.add_argument("--calibration", type=Path, default=None,
+                        help="replay a saved calibration JSON instead of calling Deribit")
     parser.add_argument("--instrument", default="BTC-PERPETUAL")
     parser.add_argument("--participation", type=float, default=0.10,
                         help="order size as a fraction of ADV (default: 0.10)")
@@ -39,8 +47,17 @@ def main() -> None:
         size_note = "fixed size, no ADV reference"
         print("offline: illustrative parameters, not calibrated to any instrument")
     else:
-        from execution.data import calibrate_from_deribit
-        cal = calibrate_from_deribit(args.instrument)
+        if args.calibration:
+            cal = json.loads(args.calibration.read_text())
+            print(f"replaying calibration {args.calibration.name} (measured {cal['date']})")
+        else:
+            from execution.data import calibrate_from_deribit
+            cal = calibrate_from_deribit(args.instrument)
+            cal = {"instrument": args.instrument, "date": date.today().isoformat(), **cal}
+            snap = ROOT / "data" / "calibration" / f"{args.instrument}_{cal['date']}.json"
+            snap.parent.mkdir(parents=True, exist_ok=True)
+            snap.write_text(json.dumps(cal, indent=2) + "\n")
+            print(f"saved calibration -> {snap.relative_to(ROOT)}")
         sigma, price = cal["sigma"], cal["price"]
         # Temporary impact must come out in price units. eta = 1/ADV has units of
         # 1/(units per day) and produced impact of two cents a unit on a $77,000

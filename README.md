@@ -8,18 +8,23 @@ minimise `E[cost] + λ·Var[cost]` — and the optimal schedule comes out in clo
 
 ## The trade-off
 
-Everything below is calibrated to a live Deribit book, not to chosen numbers.
-BTC-PERPETUAL on 2026-09-02: price $77,019, σ $1,494/day, ADV 5,377 contracts,
-touch spread $4.00. Liquidating over 5 days in 20 slices at a 1-day half-life:
+Everything below is calibrated to a live Deribit book, not to chosen numbers, and the
+calibration is committed so the table can be replayed without the network
+(`--calibration data/calibration/BTC-PERPETUAL_2026-10-02.json`). BTC-PERPETUAL on
+2026-10-02: price $85,186, σ $1,606/day, ADV 5,749 contracts, touch spread $0.50.
+Liquidating over 5 days in 20 slices at a 1-day half-life:
 
 | order size | schedule | cost ($) | cost (bps) | risk, std ($) |
 |---|---|--:|--:|--:|
-| 2% of ADV | Almgren–Chriss | 1,410 | 1.7 | 124,003 |
-| ($8.3M) | TWAP | 930 | 1.1 | 199,707 |
-| 10% of ADV | **Almgren–Chriss** | 32,016 | **7.7** | 620,009 |
-| ($41.4M) | TWAP | 20,025 | 4.8 | 998,522 |
-| 25% of ADV | Almgren–Chriss | 199,592 | 19.3 | 1,549,986 |
-| ($103.5M) | TWAP | 124,648 | 12.0 | 2,496,246 |
+| 2% of ADV | Almgren–Chriss | 1,494 | 1.5 | 142,468 |
+| ($9.8M) | TWAP | 943 | 1.0 | 229,444 |
+| 10% of ADV | **Almgren–Chriss** | 36,773 | **7.5** | 712,339 |
+| ($49.0M) | TWAP | 22,996 | 4.7 | 1,147,219 |
+| 25% of ADV | Almgren–Chriss | 229,294 | 18.7 | 1,780,856 |
+| ($122.4M) | TWAP | 143,188 | 11.7 | 2,868,061 |
+
+(The first calibration, on 2026-09-02 at $77,019 with a $4.00 spread, put the 10% order
+at 7.7 bps against TWAP's 4.8; the ratios below were the same then.)
 
 TWAP is cheaper on impact but carries **~60% more risk** — it holds inventory longer.
 Almgren–Chriss front-loads the selling to cut that risk, paying about 60% more in
@@ -30,14 +35,14 @@ achievable cost at each level of risk.
 Two things the calibration forces you to get right, and neither is optional:
 
 **Size the order off the book you measured.** Liquidating a hardcoded 1,000,000 units
-against a 5,377-contract ADV is 186 days of volume, and a linear temporary-impact
+against a 5,377-contract ADV (the 2026-09-02 book) is 186 days of volume, and a linear temporary-impact
 model describes nothing at that size. Orders are specified as a participation rate.
 
 **Impact has units.** `η = 1/ADV` carries units of 1/(contracts per day), and on a
 $77,000 instrument it produced two cents of slippage per contract — 0.0 bps on a
 $41M order, which is not a cost model. `η = σ/ADV` says trading one full ADV in a day
 costs about one daily volatility of slippage: dimensionally consistent, and it puts a
-10%-ADV order at 7.7 bps, which is a number you can argue with.
+10%-ADV order at 7.5 bps, which is a number you can argue with.
 
 ![Efficient frontier](reports/figures/efficient_frontier.png)
 
@@ -97,7 +102,8 @@ BTC calibration, i.e. liquidate immediately. A half-life is the same number what
 are trading.
 
 ```bash
-uv run python scripts/run_execution.py                     # real Deribit calibration
+uv run python scripts/run_execution.py                     # real Deribit calibration, saved to data/calibration/
+uv run python scripts/run_execution.py --calibration data/calibration/BTC-PERPETUAL_2026-10-02.json   # replay, offline
 uv run python scripts/run_execution.py --participation 0.25 --half-life 0.5
 uv run python scripts/run_execution.py --offline           # illustrative, no network
 uv run pytest                                              # trajectory + frontier invariants
