@@ -23,9 +23,6 @@ Liquidating over 5 days in 20 slices at a 1-day half-life:
 | 25% of ADV | Almgren–Chriss | 229,294 | 18.7 | 1,780,856 |
 | ($122.4M) | TWAP | 143,188 | 11.7 | 2,868,061 |
 
-(The first calibration, on 2026-09-02 at $77,019 with a $4.00 spread, put the 10% order
-at 7.7 bps against TWAP's 4.8; the ratios below were the same then.)
-
 TWAP is cheaper on impact but carries **~60% more risk** — it holds inventory longer.
 Almgren–Chriss front-loads the selling to cut that risk, paying about 60% more in
 impact to take roughly 38% off the standard deviation. Which of those you want is the
@@ -91,14 +88,12 @@ is convex — its slope at any point is $-1/\lambda$.
 
 `σ`, average daily volume and the live touch spread are pulled from a **real Deribit
 instrument**, and this is the default path — there is no invented book to fall back to
-unless you ask for one. Temporary impact scales as `σ/ADV`; `ε` is half the quoted
-spread, which used to be hardcoded at 0.0625, a US equity tick from before
-decimalisation.
+unless you ask for one. Temporary impact scales as `σ/ADV`; `ε` is half the live quoted
+spread.
 
 Urgency is specified as a **half-life in days** rather than as `λ`. `λ` divides through
-by `σ²` and `η̃`, so it carries the instrument's price and volume units: the old default
-of `2e-6` was reasonable on a made-up book and puts the half-life at 0.02 days on a real
-BTC calibration, i.e. liquidate immediately. A half-life is the same number whatever you
+by `σ²` and `η̃`, so it carries the instrument's price and volume units: a `λ` of `2e-6`
+puts the half-life at 0.02 days on a real BTC calibration, i.e. liquidate immediately. A half-life is the same number whatever you
 are trading.
 
 ```bash
