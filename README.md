@@ -152,7 +152,7 @@ That is not "close to"; it is statistically the same number.
 
 **Nothing beats TWAP, including the closed form.** Almgren–Chriss costs 0.107 bps more
 than equal slices out of sample, t = 0.38, and wins in 50.5% of episodes. A coin flip. The
-theory's edge over TWAP is real but it is 0.6% of the cost, and a single execution's outcome
+theory's edge over TWAP is real, but it is 0.6% of the cost, and a single execution's outcome
 has a standard deviation of 49 bps. You are trying to hear one part in five hundred.
 
 ![Per-episode objective differences](reports/figures/rl_objective_gap.png)
