@@ -17,9 +17,9 @@ Liquidating over 5 days in 20 slices at a 1-day half-life:
 | order size | schedule | cost ($) | cost (bps) | risk, std ($) |
 |---|---|--:|--:|--:|
 | 2% of ADV | Almgren–Chriss | 1,494 | 1.5 | 142,468 |
-| ($9.8M) | TWAP | 943 | 1.0 | 229,444 |
-| 10% of ADV | **Almgren–Chriss** | 36,773 | **7.5** | 712,339 |
-| ($49.0M) | TWAP | 22,996 | 4.7 | 1,147,219 |
+| ($9.8M) | TWAP | 943 | 1.0 | 229,445 |
+| 10% of ADV | **Almgren–Chriss** | 36,773 | **7.5** | 712,342 |
+| ($49.0M) | TWAP | 22,996 | 4.7 | 1,147,224 |
 | 25% of ADV | Almgren–Chriss | 229,294 | 18.7 | 1,780,856 |
 | ($122.4M) | TWAP | 143,188 | 11.7 | 2,868,061 |
 
